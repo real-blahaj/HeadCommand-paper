@@ -25,7 +25,6 @@ import org.bukkit.inventory.meta.SkullMeta;
 import javax.annotation.Nullable;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 public class TextureCommand {
@@ -84,6 +83,7 @@ public class TextureCommand {
 
     public static LiteralCommandNode<CommandSourceStack> getCommand() {
         return Commands.literal("texture")
+                .requires(sender -> sender.getSender().hasPermission("head.texture") || sender.getSender().isOp())
                 .then(Commands.literal("profile")
                         .then(Commands.argument("profile", ArgumentTypes.playerProfiles())
                                 .executes(ctx -> {
