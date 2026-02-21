@@ -12,6 +12,8 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.PlayerProfileListResolver;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -82,10 +84,6 @@ public class TextureCommand {
 
     public static LiteralCommandNode<CommandSourceStack> getCommand() {
         return Commands.literal("texture")
-                .then(Commands.literal("encode")
-                        .then(Commands.argument("data", StringArgumentType.greedyString())
-                                .executes(ctx -> setTextureToData(ctx, Base64.getEncoder().encodeToString(ctx.getArgument("data", String.class).getBytes())))
-                        ))
                 .then(Commands.literal("profile")
                         .then(Commands.argument("profile", ArgumentTypes.playerProfiles())
                                 .executes(ctx -> {
@@ -135,10 +133,35 @@ public class TextureCommand {
                             }).start();
                             return Command.SINGLE_SUCCESS;
                         }))
+                .then(Commands.literal("encode")
+                        .then(Commands.argument("data", StringArgumentType.greedyString())
+                                .executes(ctx -> {
+                                    String toEncode = ctx.getArgument("data", String.class);
+                                    String data = Base64.getEncoder().encodeToString(toEncode.getBytes());
+                                    int returnValue = setTextureToData(ctx, data);
+                                    if (returnValue >= 1) ctx.getSource().getSender().sendRichMessage("Set head texture to <data>",Placeholder.component("data",
+                                            Component.text(data.length() > 50 ? data.substring(0, 50)+"..." : data).hoverEvent(Component.text(data)
+                                                    .append(Component.text("\n\nEncoded: "+toEncode).color(NamedTextColor.GRAY).decorate(TextDecoration.ITALIC))
+                                            )
+                                    ));
+                                    return returnValue;
+                                })
+                        ))
                 .then(Commands.argument("data", StringArgumentType.greedyString())
-                        .executes(ctx -> setTextureToData(ctx, ctx.getArgument("data", String.class)))
+                        .executes(ctx -> {
+                            String data = ctx.getArgument("data", String.class);
+                            int returnValue = setTextureToData(ctx, data);
+                            if (returnValue >= 1) ctx.getSource().getSender().sendRichMessage("Set head texture to <data>",Placeholder.component("data",
+                                    Component.text(data.length() > 50 ? data.substring(0, 50)+"..." : data).hoverEvent(Component.text(data))
+                            ));
+                            return returnValue;
+                        })
                 )
-                .executes(ctx -> setTextureToData(ctx, null))
+                .executes(ctx -> {
+                    int returnValue = setTextureToData(ctx, null);
+                    if (returnValue >= 1) ctx.getSource().getSender().sendRichMessage("Removed texture from Player Head<newline><gray><i>Wanted to reset the texture to default? Run <white><u><click:run_command:/head texture profile>/head texture profile</click></u></white> to do so.");
+                    return returnValue;
+                })
                 .build();
     }
 }
