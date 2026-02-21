@@ -1,0 +1,7 @@
+name: HeadCommand
+version: '1.0'
+main: moe.pxe.headCommand.HeadCommand
+api-version: '1.21.4'
+authors: [ pixiboot ]
+description: Adds a /head command that includes options for changing the note block sound and texture data of heads.
+website: pxe.moe
