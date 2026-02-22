@@ -11,6 +11,7 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.PlayerProfileListResolver;
+import moe.pxe.headCommand.HeadCommand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -54,6 +55,7 @@ public class TextureCommand {
         itemProfile.setProperties(profile.getProperties());
         meta.setPlayerProfile(itemProfile);
         item.setItemMeta(meta);
+        sender.playSound(HeadCommand.MODIFY_SOUND);
         return true;
     }
 
@@ -75,6 +77,7 @@ public class TextureCommand {
 
             if (data != null) profile.setProperty(new ProfileProperty("textures", data));
             else profile.clearProperties();
+            profile.complete(false);
             meta.setPlayerProfile(profile);
         });
 
@@ -110,7 +113,10 @@ public class TextureCommand {
                                         }
                                         PlayerProfile profile = (PlayerProfile) profiles.toArray()[0];
 
-                                        if (setTextureToProfile(ctx.getSource().getSender(), item, profile)) ctx.getSource().getSender().sendRichMessage("Set texture to <profile>'s skin", Placeholder.unparsed("profile", profile.getName() != null ? profile.getName() : "player"));
+                                        if (setTextureToProfile(ctx.getSource().getSender(), item, profile)) {
+                                            ctx.getSource().getSender().sendRichMessage("Set texture to <profile>'s skin", Placeholder.unparsed("profile", profile.getName() != null ? profile.getName() : "player"));
+                                            ctx.getSource().getSender().playSound(HeadCommand.MODIFY_SOUND);
+                                        }
                                     }).start();
 
                                     return Command.SINGLE_SUCCESS;
@@ -129,7 +135,10 @@ public class TextureCommand {
                             }
 
                             new Thread(() -> {
-                                if (setTextureToProfile(ctx.getSource().getSender(), item, null)) ctx.getSource().getSender().sendRichMessage("Set head texture to default");
+                                if (setTextureToProfile(ctx.getSource().getSender(), item, null)) {
+                                    ctx.getSource().getSender().sendRichMessage("Set head texture to default");
+                                    ctx.getSource().getSender().playSound(HeadCommand.MODIFY_SOUND);
+                                }
                             }).start();
                             return Command.SINGLE_SUCCESS;
                         }))
@@ -139,11 +148,14 @@ public class TextureCommand {
                                     String toEncode = ctx.getArgument("data", String.class);
                                     String data = Base64.getEncoder().encodeToString(toEncode.getBytes());
                                     int returnValue = setTextureToData(ctx, data);
-                                    if (returnValue >= 1) ctx.getSource().getSender().sendRichMessage("Set head texture to <data>",Placeholder.component("data",
-                                            Component.text(data.length() > 50 ? data.substring(0, 50)+"..." : data).hoverEvent(Component.text(data)
-                                                    .append(Component.text("\n\nEncoded: "+toEncode).color(NamedTextColor.GRAY).decorate(TextDecoration.ITALIC))
-                                            )
-                                    ));
+                                    if (returnValue >= 1) {
+                                        ctx.getSource().getSender().sendRichMessage("Set head texture to <data>", Placeholder.component("data",
+                                                Component.text(data.length() > 50 ? data.substring(0, 50) + "..." : data).hoverEvent(Component.text(data)
+                                                        .append(Component.text("\n\nEncoded: " + toEncode).color(NamedTextColor.GRAY).decorate(TextDecoration.ITALIC))
+                                                )
+                                        ));
+                                        ctx.getSource().getSender().playSound(HeadCommand.MODIFY_SOUND);
+                                    }
                                     return returnValue;
                                 })
                         ))
@@ -151,15 +163,21 @@ public class TextureCommand {
                         .executes(ctx -> {
                             String data = ctx.getArgument("data", String.class);
                             int returnValue = setTextureToData(ctx, data);
-                            if (returnValue >= 1) ctx.getSource().getSender().sendRichMessage("Set head texture to <data>",Placeholder.component("data",
-                                    Component.text(data.length() > 50 ? data.substring(0, 50)+"..." : data).hoverEvent(Component.text(data))
-                            ));
+                            if (returnValue >= 1) {
+                                ctx.getSource().getSender().sendRichMessage("Set head texture to <data>", Placeholder.component("data",
+                                        Component.text(data.length() > 50 ? data.substring(0, 50) + "..." : data).hoverEvent(Component.text(data))
+                                ));
+                                ctx.getSource().getSender().playSound(HeadCommand.MODIFY_SOUND);
+                            }
                             return returnValue;
                         })
                 )
                 .executes(ctx -> {
                     int returnValue = setTextureToData(ctx, null);
-                    if (returnValue >= 1) ctx.getSource().getSender().sendRichMessage("Removed texture from Player Head<newline><gray><i>Wanted to reset the texture to default? Run <white><u><click:run_command:/head texture profile>/head texture profile</click></u></white> to do so.");
+                    if (returnValue >= 1) {
+                        ctx.getSource().getSender().sendRichMessage("Removed texture from Player Head<newline><gray><i>Wanted to reset the texture to default? Run <white><u><click:run_command:/head texture profile>/head texture profile</click></u></white> to do so.");
+                        ctx.getSource().getSender().playSound(HeadCommand.REMOVE_SOUND);
+                    }
                     return returnValue;
                 })
                 .build();

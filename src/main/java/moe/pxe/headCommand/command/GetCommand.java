@@ -1,7 +1,6 @@
 package moe.pxe.headCommand.command;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
-import com.destroystokyo.paper.profile.ProfileProperty;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -13,15 +12,9 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.PlayerProfileListResolver;
 import moe.pxe.headCommand.HeadCommand;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 public class GetCommand {
 
@@ -48,7 +41,7 @@ public class GetCommand {
                 return;
             }
             for (PlayerProfile profile : profiles) {
-                HeadCommand.giveHead(ctx.getSource().getSender(), (Player) ctx.getSource().getExecutor(), profile, finalAmount);
+                HeadCommand.giveHead(ctx.getSource().getSender(), player, profile, finalAmount);
             }
         }).start();
 

@@ -1,11 +1,11 @@
 package moe.pxe.headCommand.command;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import moe.pxe.headCommand.HeadCommand;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
@@ -35,6 +35,7 @@ public class NoteBlockCommand {
 
                             item.editMeta(SkullMeta.class, meta -> meta.setNoteBlockSound((NamespacedKey) key));
                             ctx.getSource().getSender().sendRichMessage("Set Note Block sound value to <aqua><key>", Placeholder.unparsed("key", key.asString()));
+                            ctx.getSource().getSender().playSound(HeadCommand.MODIFY_SOUND);
 
                             return Command.SINGLE_SUCCESS;
                         }))
@@ -50,9 +51,12 @@ public class NoteBlockCommand {
                         return 0;
                     }
 
-                    item.editMeta(SkullMeta.class, meta -> {
-                        meta.setNoteBlockSound(null);
-                    });
+                    item.editMeta(SkullMeta.class, meta ->
+                        meta.setNoteBlockSound(null)
+                    );
+
+                    ctx.getSource().getSender().sendRichMessage("Removed Note Block sound value from head");
+                    ctx.getSource().getSender().playSound(HeadCommand.REMOVE_SOUND);
 
                     return Command.SINGLE_SUCCESS;
                 })
